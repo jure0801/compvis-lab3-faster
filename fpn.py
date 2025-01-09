@@ -49,8 +49,38 @@ class FeaturePyramidNetwork(nn.Module):
         # to compute "fpn_pool" features.
         # Use F.interpolate with mode "nearest" to upsample the features.
         # YOUR CODE HERE
+        # Process res5 -> fpn5
+        out["fpn5"] = self.blend_convs[3](self.channel_projections[3](x["res5"]))
 
+        maxpool = nn.MaxPool2d(kernel_size=1, stride=2)
+        out["fpn_pool"] = maxpool(out["fpn5"])
 
+        res_5_interpolated = F.interpolate(
+            self.channel_projections[3](x["res5"]),
+            scale_factor=2,
+            mode="nearest"
+        )
+
+        res_5_res_4 = self.channel_projections[2](x["res4"]) + res_5_interpolated
+        out["fpn4"] = self.blend_convs[2](res_5_res_4)
+
+        res_5_res_4_interpolated = F.interpolate(
+            res_5_res_4,
+            scale_factor=2,
+            mode="nearest"
+        )
+
+        res_5_res_4_res_3 = self.channel_projections[1](x["res3"]) + res_5_res_4_interpolated
+        out["fpn3"] = self.blend_convs[1](res_5_res_4_res_3)
+
+        res_5_res_4_res_3_interpolated = F.interpolate(
+            res_5_res_4_res_3,
+            scale_factor=2,
+            mode="nearest"
+        )
+
+        res_5_res_4_res_3_res_2 = self.channel_projections[0](x["res2"]) + res_5_res_4_res_3_interpolated
+        out["fpn2"] = self.blend_convs[0](res_5_res_4_res_3_res_2)
 
         # Rest of the code expects a dictionary with properly ordered keys.
         ordered_out = OrderedDict()

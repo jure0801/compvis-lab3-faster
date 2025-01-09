@@ -70,7 +70,8 @@ class Bottleneck(nn.Module):
         if self.downsample is not None:
             identity = self.downsample(x)
 
-        # YOUR CODE HERE
+        out = out + identity
+        out = self.relu(out)
         return out
 
 
@@ -174,12 +175,11 @@ class ResNet(nn.Module):
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
-        # YOUR CODE HERE
-        # INSERT YOUR CODE BELOW ACCORDING TO YOUR PREFERENCE
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
+
+        layers = [self.layer1, self.layer2, self.layer3, self.layer4]
+        for idx, layer in enumerate(layers, start=2):
+            x = layer(x)
+            out_dict[f"res{idx}"] = x
         return out_dict
 
     def forward(self, x):

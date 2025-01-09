@@ -37,7 +37,9 @@ class TwoMLPHead(nn.Module):
         two linear layers with relu activations
         after each layer.
         """
-        # YOUR CODE HERE
+        x = x.view(x.size(0), -1)
+        x = torch.relu(self.fc6(x))
+        x = torch.relu(self.fc7(x))
         return x
 
 
@@ -55,11 +57,11 @@ class FastRCNNPredictor(nn.Module):
         super().__init__()
         self.cls_score = nn.Linear(
             in_channels,
-            # YOUR CODE HERE
+            num_classes
         )
         self.bbox_pred = nn.Linear(
             in_channels,
-            # YOUR CODE HERE
+            num_classes * 4
         )
 
     def forward(self, x):

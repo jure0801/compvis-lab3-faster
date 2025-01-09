@@ -1,6 +1,6 @@
 import matplotlib
 import torch
-from PIL import Image
+from PIL import Image, ImageDraw
 import torchvision
 
 from faster import FasterRCNNwithFPN
@@ -13,7 +13,7 @@ import numpy as np
 
 
 def generate_colormap(n):
-    colormap = matplotlib.cm.get_cmap("jet", n)
+    colormap = matplotlib.colormaps.get_cmap("jet")
     st0 = np.random.get_state()
     np.random.seed(44)
     perm = np.random.permutation(n)
@@ -53,6 +53,18 @@ if __name__ == '__main__':
     categories = _COCO_CATEGORIES
     colormap = generate_colormap(len(categories))
     boxes, scores, labels = model(img_pth)
+
+    draw = ImageDraw.Draw(img)
     for box, label, score in zip(boxes, labels, scores):
-        # YOUR CODE HERE
-        pass
+        if score > 0.95:
+            category = categories[label]
+            color = tuple(map(int, colormap[label]))
+            
+            x1, y1, x2, y2 = map(int, box)
+            
+            draw.rectangle([(x1, y1), (x2, y2)], outline=color, width=2)
+            
+            label_text = f"{category}: {score:.2f}"
+            draw.text((x1, y1-10), label_text, fill=color)
+    
+    img.show()
